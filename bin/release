@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Usage: bin/release BUILD_DIR
+
+echo "--- {}"

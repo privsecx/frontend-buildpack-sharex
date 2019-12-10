@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Usage: bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+
+echo "-----> Installing yarn"
+npm i -g yarn
+
+echo "-----> Building react app"
+set -x
+cd $1/web
+yarn install --frozen-lockfile --production
+yarn build
+
+set +x
+echo "-----> Copying frontend app to rails public dir"
+set -x
+cd $1
+cp -r web/build/* api/public/

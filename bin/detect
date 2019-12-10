@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Usage: bin/detect BUILD_DIR
+
+if [[ -f $1/web/package.json && -d $1/api/public ]]; then
+  echo "Compile frontend buildpack"
+  exit 0
+fi
+
+if [[ ! -f $1/web/package.json ]]; then
+  echo "FATAL: Missing expected file: web/package.json"
+fi
+
+if [[ ! -f $1/api/public ]]; then
+  echo "FATAL: Missing expected target dir: api/public/"
+fi
+
+echo "Ensure that these are present at the top level of the repo, which currently has these files/dirs:"
+
+ls -1p "$1"
+
+exit 1
