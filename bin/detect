@@ -3,9 +3,11 @@
 # Usage: bin/detect BUILD_DIR
 
 if [[ -f $1/web/package.json && -d $1/api/public ]]; then
-  echo "Compile frontend buildpack"
+  echo "Compile-frontend"
   exit 0
 fi
+
+exec 1>&2
 
 if [[ ! -f $1/web/package.json ]]; then
   echo "FATAL: Missing expected file: web/package.json"
