@@ -2,17 +2,22 @@
 
 # Usage: bin/compile BUILD_DIR CACHE_DIR ENV_DIR
 
+set -euo pipefail
+
+source_dir=$1/${FRONTEND_BUILDPACK_SOURCE_DIR}
+target_dir=$1/${FRONTEND_BUILDPACK_TARGET_DIR}
+
 echo "-----> Installing yarn"
-npm i -g yarn
+npm install -g yarn
 
 echo "-----> Building react app"
 set -x
-cd $1/web
+cd ${source_dir}
 yarn install --frozen-lockfile --production
 yarn build
 
 set +x
 echo "-----> Copying frontend app to rails public dir"
 set -x
-cd $1
-cp -r web/build/* api/public/
+mkdir -p ${target_dir}
+cp -r ${source_dir}/build/* ${target_dir}/
