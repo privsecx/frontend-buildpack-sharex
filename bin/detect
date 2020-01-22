@@ -2,26 +2,8 @@
 
 # Usage: bin/detect BUILD_DIR
 
-if [[ -z ${FRONTEND_BUILDPACK_SOURCE_DIR} ]]; then
-  exec 1>&2
-  echo "FATAL: Please set env var: FRONTEND_BUILDPACK_SOURCE_DIR"
-  exit 1
-fi
-
-if [[ -z ${FRONTEND_BUILDPACK_TARGET_DIR} ]]; then
-  exec 1>&2
-  echo "FATAL: Please set env var: FRONTEND_BUILDPACK_TARGET_DIR"
-  exit 1
-fi
-
-source_requirement=$1/${FRONTEND_BUILDPACK_SOURCE_DIR}/package.json
-
-if [[ ! -f ${source_requirement} ]]; then
-  exec 1>&2
-  echo "FATAL: Missing expected file: ${source_requirement}"
-  echo "Ensure that this file is present in the top level dir, which currently contains these files/dirs:"
-  ls -1p "$1"
-  exit 1
-fi
+echo $*
+echo $*
+echo $*
 
 echo "Compile-frontend"

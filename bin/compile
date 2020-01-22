@@ -4,8 +4,38 @@
 
 set -euo pipefail
 
-source_dir=$1/${FRONTEND_BUILDPACK_SOURCE_DIR}
-target_dir=$1/${FRONTEND_BUILDPACK_TARGET_DIR}
+# Detect requirements and fail if not met.
+# Note: we can't do this in bin/detect script
+# as we don't have access to env vars there.
+
+build_dir=$1
+env_dir=$3
+
+if [[ -f $env_dir/FRONTEND_BUILDPACK_SOURCE_DIR ]]; then
+  source_dir=$build_dir/$(cat $env_dir/FRONTEND_BUILDPACK_SOURCE_DIR)
+else
+  echo "FATAL: Please set env var: FRONTEND_BUILDPACK_SOURCE_DIR"
+  exit 1
+fi
+
+if [[ -f $env_dir/FRONTEND_BUILDPACK_TARGET_DIR ]]; then
+  target_dir=$build_dir/$(cat $env_dir/FRONTEND_BUILDPACK_TARGET_DIR)
+else
+  echo "FATAL: Please set env var: FRONTEND_BUILDPACK_TARGET_DIR"
+  exit 1
+fi
+
+source_requirement=$source_dir/package.json
+
+if [[ ! -f ${source_requirement} ]]; then
+  exec 1>&2
+  echo "FATAL: Missing expected file: package.json"
+  echo "Ensure that this file is present in the top level dir, which currently contains these files/dirs:"
+  ls -1p "$build_dir"
+  exit 1
+fi
+
+# Requirements are met; proceed with main actions:
 
 echo "-----> Installing yarn"
 npm install -g yarn
