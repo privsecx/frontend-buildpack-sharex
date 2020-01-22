@@ -17,7 +17,7 @@ if [[ ! -f $1/api/public ]]; then
   echo "FATAL: Missing expected target dir: api/public/"
 fi
 
-echo "Ensure that these are present at the top level of the repo, which currently has these files/dirs:"
+echo "Ensure that these are present in the top level dir, which currently contains these files/dirs:"
 
 ls -1p "$1"
 
