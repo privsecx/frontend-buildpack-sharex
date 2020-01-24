@@ -68,9 +68,9 @@ cp ${js_app}/build/index.html ${frontend}/
 ls ${frontend}/
 
 set +x
-echo "-----> Moving static dir to rails public dir"
+echo "-----> Copying static dir to rails public dir"
 set -x
 mkdir -p ${static}
-cp -r ${js_app}/build/static/ ${static}
+cp -r ${js_app}/build/static/* ${static}/
 
 ls ${static}/
