@@ -53,9 +53,6 @@ fi
 
 # Requirements are met; proceed with main actions:
 
-echo "-----> Installing yarn"
-npm install -g yarn
-
 echo "-----> Building JS app"
 set -x
 cd ${js_app}
