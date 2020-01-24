@@ -11,27 +11,43 @@ set -euo pipefail
 build_dir=$1
 env_dir=$3
 
-if [[ -f $env_dir/FRONTEND_BUILDPACK_SOURCE_DIR ]]; then
-  source_dir=$build_dir/$(cat $env_dir/FRONTEND_BUILDPACK_SOURCE_DIR)
-else
-  echo "FATAL: Please set env var: FRONTEND_BUILDPACK_SOURCE_DIR"
+failed=false
+for env_var in FRONTEND_BUILDPACK_JS_APP FRONTEND_BUILDPACK_JS_ROUTE FRONTEND_BUILDPACK_RAILS_APP; do
+  if [[ -f "${env_dir}/${env_var}" ]]; then
+    export ${env_var}="$(cat ${env_dir}/${env_var})"
+  else
+    echo "FATAL: Please set env var: ${env_var}"
+    failed=true
+  fi
+done
+
+if [ $failed = true ]; then
   exit 1
 fi
 
-if [[ -f $env_dir/FRONTEND_BUILDPACK_TARGET_DIR ]]; then
-  target_dir=$build_dir/$(cat $env_dir/FRONTEND_BUILDPACK_TARGET_DIR)
-else
-  echo "FATAL: Please set env var: FRONTEND_BUILDPACK_TARGET_DIR"
-  exit 1
+js_app="${build_dir}/${FRONTEND_BUILDPACK_JS_APP}"
+js_route="${FRONTEND_BUILDPACK_JS_ROUTE}"
+rails_app="${build_dir}/${FRONTEND_BUILDPACK_RAILS_APP}"
+
+js_app_requirement=$js_app/package.json
+if [[ ! -f ${js_app_requirement} ]]; then
+  echo "FATAL: Missing expected file: ${js_app_requirement}"
+  failed=true
 fi
 
-source_requirement=$source_dir/package.json
+frontend="${rails_app}/frontends/${js_route}"
+if [[ -e $frontend ]]; then
+  echo "FATAL: Unexpected: $frontend already exists"
+  failed=true
+fi
 
-if [[ ! -f ${source_requirement} ]]; then
-  exec 1>&2
-  echo "FATAL: Missing expected file: package.json"
-  echo "Ensure that this file is present in the top level dir, which currently contains these files/dirs:"
-  ls -1p "$build_dir"
+static="${rails_app}/public/${js_route}/static"
+if [[ -e $static ]]; then
+  echo "FATAL: Unexpected: $static already exists"
+  failed=true
+fi
+
+if [ $failed = true ]; then
   exit 1
 fi
 
@@ -40,14 +56,24 @@ fi
 echo "-----> Installing yarn"
 npm install -g yarn
 
-echo "-----> Building react app"
+echo "-----> Building JS app"
 set -x
-cd ${source_dir}
+cd ${js_app}
 yarn install --frozen-lockfile --production
 yarn build
 
 set +x
-echo "-----> Copying frontend app to rails public dir"
+echo "-----> Copying index.html to rails app"
 set -x
-mkdir -p ${target_dir}
-cp -r ${source_dir}/build/* ${target_dir}/
+mkdir -p ${frontend}
+cp ${js_app}/build/index.html ${frontend}/
+
+ls ${frontend}/
+
+set +x
+echo "-----> Moving static dir to rails public dir"
+set -x
+mkdir -p ${static}
+cp -r ${js_app}/build/static/ ${static}
+
+ls ${static}/
