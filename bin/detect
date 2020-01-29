@@ -2,4 +2,4 @@
 
 # Usage: bin/detect BUILD_DIR
 
-echo "Compile-frontend"
+echo "Frontend buildpack (Sharex)"
