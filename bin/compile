@@ -25,11 +25,13 @@ if [ $failed = true ]; then
   exit 1
 fi
 
-js_app="${build_dir}/${FRONTEND_BUILDPACK_JS_APP}"
-js_route="${FRONTEND_BUILDPACK_JS_ROUTE}"
 rails_app="${build_dir}/${FRONTEND_BUILDPACK_RAILS_APP}"
+js_route="${FRONTEND_BUILDPACK_JS_ROUTE}"
+frontends_raw="${rails_app}/frontends/raw"
+js_app_raw="${frontends_raw}/${js_route}"
+# fail if not exist ^^^
 
-js_app_requirement=$js_app/package.json
+js_app_requirement=$js_app_raw/package.json
 if [[ ! -f ${js_app_requirement} ]]; then
   echo "FATAL: Missing expected file: ${js_app_requirement}"
   failed=true
@@ -53,24 +55,28 @@ fi
 
 # Requirements are met; proceed with main actions:
 
+set -x
+cd ${frontends_raw}
+ln -sf ${rails_app} ${FRONTEND_BUILDPACK_RAILS_APP}
+
 echo "-----> Building JS app"
 set -x
-cd ${js_app}
+cd ${js_app_raw}
 yarn install --frozen-lockfile --production
 yarn build
 
 set +x
-echo "-----> Copying index.html to rails app"
+echo "-----> Copying index.html to frontend dir"
 set -x
 mkdir -p ${frontend}
-cp ${js_app}/build/index.html ${frontend}/
+cp ${js_app_raw}/build/index.html ${frontend}/
 
-ls ${frontend}/
+ls -laFG ${frontend}/
 
 set +x
 echo "-----> Copying static dir to rails public dir"
 set -x
 mkdir -p ${static}
-cp -r ${js_app}/build/static/* ${static}/
+cp -r ${js_app_raw}/build/static/. ${static}
 
-ls ${static}/
+ls -laFG ${static}/
